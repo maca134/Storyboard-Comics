@@ -160,12 +160,6 @@ function optionsframework_options() {
         "std" => "0",
         "type" => "text");
 
-    $options[] = array("name" => "Next Gallery Panel Image",
-        "desc" => "Upload an image for the next gallery slide.",
-        "id" => "next_panel_image",
-        "type" => "upload",
-        'std' => get_template_directory_uri() . '/img/key_right.png');
-
     $options[] = array("name" => "Next Gallery Panel Text",
         "desc" => "Set some text for the next gallery link. (Use %s to insert the name of the next gallery)",
         "id" => "next_gallery_link",
