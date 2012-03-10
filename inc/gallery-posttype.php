@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Gallery Post Type
  * 
@@ -8,7 +9,6 @@
  * @subpackage Storyboard_Comics
  * @since Storyboard Comics 0.1
  */
-
 class storyboardcomics_gallery_posttype {
 
     protected static $instances = null;
@@ -24,8 +24,11 @@ class storyboardcomics_gallery_posttype {
     private $post_type = 'storyboard_gallery';
     private $meta_fields = array(
         'storyboard_gallery_type' => 'list',
+        'storyboard_gallery_nav' => 'on',
         'storyboard_gallery_thumb' => array(),
-        'storyboard_gallery_caption' => array()
+        'storyboard_gallery_caption' => array(),
+        'storyboard_link_panel' => array(),
+        'storyboard_link_to' => array(),
     );
 
     private function __construct() {
@@ -49,7 +52,7 @@ class storyboardcomics_gallery_posttype {
             'capability_type' => 'post',
             'hierarchical' => true,
             'rewrite' => array('slug' => 'galleries'), // Permalinks
-            'supports' => array('title', 'editor', 'author', 'thumbnail', 'excerpt', 'page-attributes', 'comments') // Let's use custom fields for debugging purposes only
+            'supports' => array('title', 'editor', 'author', 'thumbnail', 'excerpt', 'page-attributes', 'comments', 'custom-fields') // Let's use custom fields for debugging purposes only
         ));
         add_image_size('storyboard_gallery_admin_thumb', 100, 100, true);
         add_image_size('storyboard_gallery_thumb', 300, of_get_option('panel_height', '150'), true);
@@ -134,6 +137,7 @@ class storyboardcomics_gallery_posttype {
 
     public function settings_meta_box($post) {
         $gallery_type = $this->get('storyboard_gallery_type', $post->ID);
+        $show_nav = $this->get('storyboard_gallery_nav', $post->ID);
         ?>
         <script>
             jQuery(function($) {
@@ -173,6 +177,13 @@ class storyboardcomics_gallery_posttype {
                 </label>
             </p>
         </div>
+        <div class="storyboard_settings group">
+            <h4 style="margin-bottom: 5px;">Pagination</h4>
+            <p>
+                <label><input type="radio" class="storyboard_show_page" name="storyboard_gallery_nav" value="on"<?php if ($show_nav == 'on') { ?> checked="checked"<?php } ?>> On</label><br />
+                <label><input type="radio" class="storyboard_show_page" name="storyboard_gallery_nav" value="off"<?php if ($show_nav == 'off') { ?> checked="checked"<?php } ?>> Off</label>
+            </p>
+        </div>
         <?php
         wp_nonce_field(plugin_basename(__FILE__), $this->post_type . '_noncename');
     }
@@ -180,6 +191,8 @@ class storyboardcomics_gallery_posttype {
     public function thumb_meta_box($post) {
         $gallery = $this->get('storyboard_gallery_thumb', $post->ID);
         $caption = $this->get('storyboard_gallery_caption', $post->ID);
+        $link_panel = $this->get('storyboard_link_panel', $post->ID);
+        $link_to = $this->get('storyboard_link_to', $post->ID);
         ?>
         <script type="text/javascript">
             var POST_ID = <?php echo $post->ID; ?>;
@@ -190,7 +203,7 @@ class storyboardcomics_gallery_posttype {
             <ul id="storyboardcomics_thumbs" class="group"><?php
         if (is_array($gallery) && count($gallery) > 0) {
             foreach ($gallery as $i => $attachment_id) {
-                echo $this->admin_thumb($attachment_id, (isset($caption[$i]) ? $caption[$i] : ''));
+                echo $this->admin_thumb($attachment_id, (isset($caption[$i]) ? $caption[$i] : ''), (isset($link_panel[$i]) ? $link_panel[$i] : '0'), (isset($link_to[$i]) ? $link_to[$i] : ''));
             }
         }
         ?></ul>
@@ -255,13 +268,46 @@ class storyboardcomics_gallery_posttype {
         die;
     }
 
-    private function admin_thumb($attachment_id, $caption = '') {
+    private function admin_thumb($attachment_id, $caption = '', $link_panel = '0', $link_to = '') {
         $image = wp_get_attachment_image_src($attachment_id, 'storyboard_gallery_admin_thumb', true);
         ?>
-        <li>
-            <img src="<?php echo $image[0]; ?>" width="<?php echo $image[1]; ?>" height="<?php echo $image[2]; ?>" /><a href="#" class="storyboard_gallery_remove">Remove</a>
-            <input type="hidden" name="storyboard_gallery_thumb[]" value="<?php echo $attachment_id; ?>" />
-            <textarea name="storyboard_gallery_caption[]"><?php echo $caption; ?></textarea>
+        <li class="group">
+            <img src="<?php echo $image[0]; ?>" width="<?php echo $image[1]; ?>" height="<?php echo $image[2]; ?>" />
+            <a href="#" class="storyboard_gallery_remove">Remove</a>
+            <div class="storyboard_gallery_thumb_controls">
+                <input type="hidden" name="storyboard_gallery_thumb[<?php echo $attachment_id; ?>]" value="<?php echo $attachment_id; ?>" />
+                <p class="storyboard_gallery_caption">
+                    <label for="storyboard_gallery_caption<?php echo $attachment_id; ?>" style="display: block;">Caption</label>
+                    <textarea name="storyboard_gallery_caption[<?php echo $attachment_id; ?>]" id="storyboard_gallery_caption<?php echo $attachment_id; ?>"><?php echo $caption; ?></textarea>
+                </p>
+                <p>
+                    <label for="storyboard_link_panel<?php echo $attachment_id; ?>">Link Panel</label>
+                    <input class="storyboard_show_page" type="checkbox" name="storyboard_link_panel[<?php echo $attachment_id; ?>]" value="1" id="storyboard_link_panel<?php echo $attachment_id; ?>" <?php
+        if ($link_panel == '1') {
+            echo ' checked="checked"';
+        }
+        ?> />
+                </p>
+                <p class="storyboard_link_to">
+                    <label for="storyboard_link_to<?php echo $attachment_id; ?>">Gallery</label>
+                    <select name="storyboard_link_to[<?php echo $attachment_id; ?>]" id="storyboard_link_to<?php echo $attachment_id; ?>">
+                        <option value="0">Select Page</option>
+                        <?php
+                        $pages = gallery_posts::get();
+                        
+                        foreach ($pages as $p) {
+                            ?>
+                            <option value="<?php echo $p['id']; ?>"<?php
+        if ($link_to == $p['id']) {
+            echo ' selected="selected"';
+        }
+        ?>><?php echo str_repeat('&nbsp;&nbsp;&nbsp;', $p['depth']) . $p['title']; ?></option>
+                            <?php
+                        }
+                        ?>
+                    </select>
+                </p>
+            </div>
         </li>
         <?php
     }
@@ -310,12 +356,50 @@ class storyboardcomics_gallery_posttype {
                 <?php echo (!empty($excerpt)) ? '<p>' . $excerpt . '</p>' : ''; ?>
                 <a href="<?php echo $permalink; ?>" title="<?php echo $title; ?>" class="corner"><span>+</span></a>
             </div>
-        
-        <?php
-        if ($last_li) echo '</li>';
-        $contents = ob_get_contents();
-        ob_end_clean();
-        return $contents;
+
+            <?php
+            if ($last_li)
+                echo '</li>';
+            $contents = ob_get_contents();
+            ob_end_clean();
+            return $contents;
+        }
+
     }
 
-}
+    class gallery_posts {
+
+        private static $pages = array();
+        private static $depth = 0;
+        private static $walked = false;
+
+        public static function get() {
+            if (self::$walked == false)
+                self::walker();
+            return self::$pages;
+        }
+
+        private static function walker($id = 0) {
+            $children = get_children(array(
+                        'post_type' => 'storyboard_gallery',
+                        'post_parent' => $id,
+                        'orderby' => 'menu_order',
+                        'order' => 'ASC'
+                    ));
+            if (!empty($children)) {
+                foreach ($children as $the_id => $c) {
+                   self::$pages[] = array(
+                        'id' => $the_id,
+                        'depth' => self::$depth,
+                        'title' => $c->post_title
+                    );
+                    self::$depth++;
+                    self::walker($the_id);
+                    self::$depth--;
+                }
+            }
+            
+            self::$walked = true;
+        }
+
+    }

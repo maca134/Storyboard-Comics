@@ -10,7 +10,6 @@ var comicslider = {
     animateTime: 500,
     pageTabs: [],
     window: {},
-    nextPostSlide: {},
     nextPost: '',
     easing: 'linear',
     visible: true,
@@ -19,8 +18,7 @@ var comicslider = {
         this.storyBoard = jQuery('#story-board');
         this.storyBoardContainer = jQuery('#story-board-container');
         this.imagesContainers = jQuery('#story-board div');
-        this.nextPostSlide = jQuery('#goto-next-post');
-        this.nextPostSlideText = jQuery('#goto-next-post h1');
+        this.nextPostSlideText = jQuery('.goto-next-post h1');
         this.window = jQuery(window);
 
         this.totalSlides = this.imagesContainers.length;
@@ -35,9 +33,6 @@ var comicslider = {
         });
         this.loadingDiv = jQuery('#loading_overlay');
         jQuery('body').prepend(this.loadingDiv);
-        this.nextPostSlide.on('click', function () {
-            comicslider.next();
-        });
     },
     show: function (cb) {
         cb = cb || function () {};
@@ -63,11 +58,7 @@ var comicslider = {
     },
     next: function () {
         var currentSlide = parseInt(this.currentSlide) + 1;
-        if (currentSlide >= this.totalSlides) {
-            if (this.nextPost !== '') {
-                window.location = this.nextPost;
-            }
-        } else {
+        if (currentSlide < this.totalSlides) {
             this.slideTo(currentSlide);
         }
     },
@@ -75,8 +66,6 @@ var comicslider = {
         var currentSlide = (this.currentSlide > 1) ? this.currentSlide - 1 : this.totalSlides - 1;
         if (this.currentSlide > 1) {
             this.slideTo(currentSlide);
-        } else {
-            
         }
     },
     resize: function () {
@@ -90,12 +79,11 @@ var comicslider = {
         });
         
         var imgHeight = this.imagesContainers.height();
-        this.nextPostSlide.css({
-            'height' : imgHeight + 'px'
-        });
+        console.log(this.nextPostSlideText.height());
         this.nextPostSlideText.css({
-            'line-height' : (imgHeight - (imgHeight / 5)) + 'px',
-            'font-size': Math.round(imgHeight / 16.7666) + 'px'
+            'font-size': Math.round(imgHeight / 16.7666) + 'px',
+            'width': (windowWidth / 2),
+            'top': Math.floor((imgHeight - this.nextPostSlideText.prev().height()) / 2) + 'px'
         });
         
         this.imagesContainers.find('img').each(function (i, ele) {

@@ -372,14 +372,16 @@ ul {
     padding: 0 5px;
 }
 
-#goto-next-post {
-    background: url(img/key_right.png) no-repeat center center;
-}
-#goto-next-post h1 {
+.goto-next-post h1 {
+    position: absolute;
     text-align: center;
     cursor: pointer;
-
+    top: 0px;
+    width: 100%;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.5)
 }
+
 #loading_overlay {
     background: url(img/loading.gif) no-repeat center center #000; 
     width: 100%; 

@@ -32,8 +32,15 @@
     width: 95%;
 }
 #storyboardcomics_thumbs li textarea {
-    height: 95px;
+    height: 85px;
     width: 75%;
+}
+.storyboard_gallery_thumb_controls {
+    width: 80%;
+    float: right;
+}
+.storyboard_gallery_thumb_controls p {
+    margin: 0;
 }
  #storyboardcomics_thumbs li img {
      cursor: move;

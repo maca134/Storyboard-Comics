@@ -172,12 +172,6 @@ function optionsframework_options() {
         "std" => "Goto %s",
         "type" => "text");
 
-    $options[] = array("name" => "Show Gallery Pagination",
-        "desc" => "Show pagination in gallery pages.",
-        "id" => "show_gallery_pagination",
-        "std" => "1",
-        "type" => "checkbox");
-
     $options[] = array("name" => "Colour Settings",
         "type" => "heading");
 

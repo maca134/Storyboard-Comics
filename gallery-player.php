@@ -74,12 +74,11 @@ if ($paged >= 2 || $page >= 2)
             }
         </style>
         <script>
-<?php $next_post = get_next_post(); ?>
+<?php ?>
     jQuery(function($) {
         comicslider.easing = '<?php echo of_get_option('gallery_easing', 'linear') ?>';
         comicslider.animateTime = <?php echo of_get_option('gallery_timeout', '1000') ?>;
         comicslider.loadingGif = '<?php echo get_template_directory_uri(); ?>/img/loading.gif';
-        comicslider.nextPost = '<?php echo ($next_post !== '' && $post->post_parent != $next_post->ID && $post->post_parent == $next_post->post_parent) ? get_permalink($next_post->ID) : ''; ?>';
         comicslider.offset = <?php echo of_get_option('slider_height_offset', '0') ?>;
         
         comicslider.init();
@@ -112,7 +111,10 @@ if ($paged >= 2 || $page >= 2)
                 storyboard_pagination.trigger('nextPage');
             }
         });
-<?php if (of_get_option('show_gallery_pagination', '1') !== '1') { ?>
+        $('.goto-next-post').on('click', function() {
+            window.location = $(this).data('url');
+        });
+<?php if (storyboardcomics_gallery_posttype::forge()->get('storyboard_gallery_nav', $post->ID) !== 'on') { ?>
             storyboard_pagination.hide();
 <?php } ?>
         
@@ -170,39 +172,40 @@ if ($paged >= 2 || $page >= 2)
                 </div>
             </div>
             <div id="story-board-banner">
-                <?php if (have_posts()) { ?>
+                <div id="story-board" class="group">
                     <?php
-                    while (have_posts()) {
-                        the_post();
-                        ?>
-                        <div id="story-board" class="group">
-                            <?php
-                            $gallery = storyboardcomics_gallery_posttype::forge()->get('storyboard_gallery_thumb', $post->ID);
-                            $caption = storyboardcomics_gallery_posttype::forge()->get('storyboard_gallery_caption', $post->ID);
+                    $gallery = storyboardcomics_gallery_posttype::forge()->get('storyboard_gallery_thumb', $post->ID);
+                    $caption = storyboardcomics_gallery_posttype::forge()->get('storyboard_gallery_caption', $post->ID);
+                    $link_panel = storyboardcomics_gallery_posttype::forge()->get('storyboard_link_panel', $post->ID);
+                    $link_to = storyboardcomics_gallery_posttype::forge()->get('storyboard_link_to', $post->ID);
+                    $i = 0;
+                    foreach ($gallery as $id => $g) {
 
-                            foreach ($gallery as $i => $g) {
-                                $c = $caption[$i];
-                                $image = wp_get_attachment_image_src($g, 'full', true);
-                                ?>
-                                <div>
-                                    <img src="<?php echo $image[0]; ?>" title="<?php echo $c; ?>" data-id="<?php echo $i; ?>">
-                                    <span><?php echo nl2br($c); ?></span>
-                                </div>
-                                <?php
-                            }
-                            if ($next_post !== '' && $post->post_parent != $next_post->ID && $post->post_parent == $next_post->post_parent) {
-                                ?>
-                                <div id="goto-next-post">
-                                    <h1><?php printf(of_get_option('next_gallery_link', 'Goto %s'), $next_post->post_title); ?></h1>
-                                </div>
-                                <?php
-                            }
+                        $c = $caption[$id];
+                        $image = wp_get_attachment_image_src($g, 'full', true);
+                        $panel = (isset($link_panel[$id]) && $link_panel[$id] = '1') ? true : false;
+                        $to = (isset($link_to[$id])) ? $link_to[$id] : false;
+
+                        if ($panel && $panel !== false) {
                             ?>
-                        </div>
-                        <?php
+                            <div class="goto-next-post" data-url="<?php echo get_permalink($to); ?>">
+                                <img src="<?php echo $image[0]; ?>" title="<?php echo $c; ?>" data-id="<?php echo $i; ?>">
+                                <h1><?php printf(of_get_option('next_gallery_link', 'Goto %s'), get_the_title($to)); ?></h1>
+                                <span><?php echo nl2br($c); ?></span>
+                            </div>
+                            <?php
+                        } else {
+                            ?>
+                            <div>
+                                <img src="<?php echo $image[0]; ?>" title="<?php echo $c; ?>" data-id="<?php echo $i; ?>">
+                                <span><?php echo nl2br($c); ?></span>
+                            </div>
+                            <?php
+                        }
+                        $i++;
                     }
-                }
-                ?>
+                    ?>
+                </div>
             </div>
             <div id="story-board-pagination" ></div>
         </div>
