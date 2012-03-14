@@ -248,6 +248,7 @@ ul {
     float: left;
     overflow: hidden;
     vertical-align: central;
+    position: relative;
 }
 
 #story-board div span {
@@ -268,6 +269,7 @@ ul {
     bottom: 0;
     width: 100%;
     border-bottom: 1px solid #fff;
+    height: 24px;
 }
 #story-board-pagination a, #story-board-pagination span {
     padding: 1px 4px 4px 4px;
@@ -398,7 +400,7 @@ ul {
     float:right;
 }
 .entry-header{
-    margin: 10px 0;
+    margin: 10px 0 0 0 ;
 }
 .sticky .entry-header .entry-meta {
     clip: rect(1px 1px 1px 1px); /* IE6, IE7 */

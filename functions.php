@@ -204,6 +204,11 @@ function storyboardcomics_custom_css() {
         /*.image-panel .storyboard_gallery_overlay {
             height: <?php echo $panel_height - 76; ?>px;
         }*/
+
+        #story-board div {
+            border-right: 1px solid <?php echo of_get_option('link_colour', '#9ac069'); ?>;
+        }
+
     </style>
     <?php
 }

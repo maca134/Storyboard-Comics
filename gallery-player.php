@@ -72,6 +72,13 @@ if ($paged >= 2 || $page >= 2)
                 overflow: hidden;
                 height: 100%;
             }
+
+            <?php if (storyboardcomics_gallery_posttype::forge()->get('storyboard_gallery_nav', $post->ID) !== 'on') { ?>
+                #story-board-pagination .jquery-pagination {
+                    display: none;
+                }
+            <?php } ?>
+
         </style>
         <script>
 <?php ?>
@@ -103,6 +110,7 @@ if ($paged >= 2 || $page >= 2)
         });
         var storyboard_pagination = $("#story-board-pagination");
         
+        
         $('#story-board img').on('click', function () {
             var s = jQuery(this).data('id');
             if ((s - comicslider.currentSlide) == -1) {
@@ -114,10 +122,6 @@ if ($paged >= 2 || $page >= 2)
         $('.goto-next-post').on('click', function() {
             window.location = $(this).data('url');
         });
-<?php if (storyboardcomics_gallery_posttype::forge()->get('storyboard_gallery_nav', $post->ID) !== 'on') { ?>
-            storyboard_pagination.hide();
-<?php } ?>
-        
         $(document).bind('keydown', function (e) {
             if (comicslider.visible == true) {
                 if (e.keyCode == 39) {
@@ -125,6 +129,14 @@ if ($paged >= 2 || $page >= 2)
                 }
                 if (e.keyCode == 37) {
                     storyboard_pagination.trigger('prevPage');
+                }
+                if (e.keyCode == 80) {
+                    var pagination = $("#story-board-pagination").children('div');
+                    if (pagination.is(':visible')) {
+                        pagination.fadeOut();
+                    } else {
+                        pagination.fadeIn();
+                    }
                 }
             }
         });
@@ -139,7 +151,7 @@ if ($paged >= 2 || $page >= 2)
             <div id="story-board-top" class="group">
                 <div class="left-col">
                     <?php if ($post->post_parent > 0) { ?><a href="<?php echo get_permalink($post->post_parent); ?>" title="<?php printf(esc_attr__('Permalink to %s', 'storyboardcomics'), get_the_title($post->post_parent)); ?>" rel="bookmark"><?php echo __('Back to', 'storyboardcomics'); ?> <?php echo get_the_title($post->post_parent); ?></a> /<?php } ?>
-                    <a href="<?php echo esc_url(home_url('/')); ?>" title="<?php echo esc_attr(get_bloginfo('name', 'display')); ?>" rel="home"><?php echo esc_attr(get_bloginfo('name', 'display')); ?></a>
+                    <a href="<?php echo esc_url(home_url('/')); ?>" title="<?php echo esc_attr(get_bloginfo('name', 'display')); ?>" rel="home"><?php echo __('Home', 'storyboardcomics'); ?></a>
                 </div>
                 <div class="middle-col">
                     <?php wp_nav_menu(array('theme_location' => 'gallery_player', 'depth' => 1, 'fallback_cb' => false)); ?>
@@ -162,7 +174,8 @@ if ($paged >= 2 || $page >= 2)
                                             <?php
                                         }
                                     }
-                                    ?></ul>
+                                    ?>
+                                </ul>
                             </li>
                         </ul>
                         <?php
@@ -189,7 +202,7 @@ if ($paged >= 2 || $page >= 2)
                         if ($panel && $panel !== false) {
                             ?>
                             <div class="goto-next-post" data-url="<?php echo get_permalink($to); ?>">
-                                <img src="<?php echo $image[0]; ?>" title="<?php echo $c; ?>" data-id="<?php echo $i; ?>">
+                                <img src="<?php echo $image[0]; ?>" title="<?php echo strip_tags($c); ?>" data-id="<?php echo $i; ?>">
                                 <h1><?php printf(of_get_option('next_gallery_link', 'Goto %s'), get_the_title($to)); ?></h1>
                                 <span><?php echo nl2br($c); ?></span>
                             </div>
@@ -197,7 +210,7 @@ if ($paged >= 2 || $page >= 2)
                         } else {
                             ?>
                             <div>
-                                <img src="<?php echo $image[0]; ?>" title="<?php echo $c; ?>" data-id="<?php echo $i; ?>">
+                                <img src="<?php echo $image[0]; ?>" title="<?php echo strip_tags($c); ?>" data-id="<?php echo $i; ?>">
                                 <span><?php echo nl2br($c); ?></span>
                             </div>
                             <?php

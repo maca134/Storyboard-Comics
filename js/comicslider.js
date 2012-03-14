@@ -71,7 +71,7 @@ var comicslider = {
     resize: function () {
         var windowHeight = this.window.height();
         var windowWidth = this.window.width();
-        this.imagesContainers.width(windowWidth / 2).find('img').width(windowWidth / 2);
+        this.imagesContainers.width((windowWidth / 2) - 1).find('img').width(windowWidth / 2);
         this.storyBoardContainer.height(windowHeight);
         var middle = (windowHeight / 2) - (this.imagesContainers.height() / 2);
         this.storyBoard.css({
@@ -79,21 +79,15 @@ var comicslider = {
         });
         
         var imgHeight = this.imagesContainers.height();
-        console.log(this.nextPostSlideText.height());
         this.nextPostSlideText.css({
             'font-size': Math.round(imgHeight / 16.7666) + 'px',
-            'width': (windowWidth / 2),
-            'top': Math.floor((imgHeight - this.nextPostSlideText.prev().height()) / 2) + 'px'
+            'width': (windowWidth / 2) - 1
         });
-        
-        this.imagesContainers.find('img').each(function (i, ele) {
-            var obj = jQuery(ele);
-            var margin = Math.floor((imgHeight - obj.height()) / 2);
-            
-            obj.css({
-                'margin-top' : margin + 'px'
-            });
-        });
+        if (this.storyBoard.height() > (windowHeight - 50)) {
+            jQuery("#story-board-pagination .jquery-pagination").fadeOut();
+        } else {
+            jQuery("#story-board-pagination .jquery-pagination").fadeIn();
+        }
         this.slideTo(this.currentSlide, 1);
     }
 };
